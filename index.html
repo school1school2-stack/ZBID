@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة أ. عبدالعزيز الفيفي - النسخة الاحترافية المعتمدة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root { 
+            --royal-blue: #1e3a8a; --q-red: #ef4444; --bg-page: #f8fafc; 
+            --success-green: #10b981; --k-purple: #7c3aed; --card-border: #e2e8f0;
+            --text-color: #1e293b; --card-bg: #ffffff;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, Arial; 
+            background: var(--bg-page); color: var(--text-color); margin: 0; padding: 20px; 
+            display: flex; flex-direction: column; align-items: center; line-height: 1.6;
+            transition: background 0.5s ease, color 0.5s ease;
+            box-sizing: border-box; user-select: none;
+        }
+
+        .user-header {
+            width: 100%; max-width: 850px; background: var(--card-bg); border-radius: 15px; padding: 20px;
+            display: flex; justify-content: space-between; align-items: center; text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-bottom: 5px solid var(--royal-blue); 
+            margin-bottom: 20px; box-sizing: border-box; gap: 15px; flex-wrap: wrap;
+        }
+        .header-right { flex: 1; text-align: right; min-width: 140px; }
+        .header-center { flex: 0 0 auto; display: flex; justify-content: center; }
+        .header-left { flex: 1; text-align: left; min-width: 140px; }
+
+        .user-name { margin: 0; color: var(--royal-blue); font-weight: bold; font-size: 1.3rem; }
+        .school-name { margin: 0; color: #64748b; font-weight: bold; font-size: 0.95rem; }
+        .logo-box { background: var(--royal-blue); width: 55px; height: 55px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.4rem; }
+
+        .top-action-bar {
+            width: 100%; max-width: 850px; background: #1e293b; border-radius: 15px; padding: 14px 20px;
+            display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px; box-sizing: border-box; gap: 12px; flex-wrap: wrap; z-index: 999;
+        }
+        .bar-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+        .styled-dropdown-wrapper { position: relative; display: inline-block; }
+        .dropdown-toggle-btn {
+            background: #3b82f6; color: white; border: none; padding: 10px 16px; border-radius: 20px;
+            font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+            gap: 8px; font-family: inherit; font-size: 0.9rem; white-space: nowrap; transition: 0.3s;
+        }
+        .dropdown-toggle-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .dropdown-menu-content {
+            display: none; position: absolute; right: 0; top: calc(100% + 8px); background: #1e293b;
+            min-width: 220px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); border-radius: 12px;
+            z-index: 1000; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .dropdown-menu-content button {
+            width: 100%; background: transparent; border: none; color: white; padding: 11px 16px;
+            text-align: right; font-family: inherit; font-size: 0.9rem; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; transition: background 0.2s; white-space: nowrap;
+        }
+        .dropdown-menu-content button:hover { background: rgba(255, 255, 255, 0.1); }
+        .styled-dropdown-wrapper.active .dropdown-menu-content { display: block; }
+
+        .btn { border: none; padding: 10px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; font-family: inherit; font-size: 0.9rem; white-space: nowrap; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-clear { background: #64748b; padding: 10px; border-radius: 50%; width: 40px; height: 40px; }
+
+        .array-import-box, .search-result-box {
+            width: 100%; max-width: 850px; background: var(--card-bg); border-radius: 15px; padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 2px dashed #0284c7; margin-bottom: 25px; box-sizing: border-box;
+        }
+        .array-textarea {
+            width: 100% !important; height: 180px !important; padding: 12px; border: 1px solid #cbd5e1;
+            border-radius: 10px; font-family: monospace; font-size: 0.85rem; direction: ltr; text-align: left;
+            outline: none; box-sizing: border-box; resize: none !important; margin-bottom: 10px;
+        }
+
+        .auth-card {
+            background: var(--card-bg); width: 100%; max-width: 850px; border-radius: 20px; padding: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box; margin-bottom: 25px;
+        }
+        .auth-input, .styled-select-input { width: 80%; max-width: 400px; padding: 15px; border-radius: 10px; border: 2px solid #cbd5e1; margin-bottom: 15px; text-align: center; font-size: 1.1rem; outline: none; box-sizing: border-box; font-family: inherit; background: #fff; }
+
+        .container { width: 100%; max-width: 850px; padding-bottom: 120px; display: none; box-sizing: border-box; }
+        
+        .exam-timer-banner {
+            width: 100%; max-width: 850px; background: #1e293b; color: #38bdf8; border-radius: 12px;
+            padding: 12px 20px; margin-bottom: 20px; display: none; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-weight: bold; box-sizing: border-box; flex-wrap: wrap; gap: 10px;
+        }
+
+        .question-card { background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 25px; border: 2px solid var(--card-border); position: relative; text-align: right; box-sizing: border-box; transition: 0.3s; }
+        .question-card::before { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 8px; background: var(--k-purple); border-radius: 0 10px 10px 0; }
+        .question-card.unanswered-alert { border: 2px solid var(--q-red) !important; background-color: #fff5f5; }
+
+        .card-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; justify-content: space-between; }
+        .q-number-badge { background: var(--k-purple); color: white; padding: 4px 15px; border-radius: 50px; font-weight: bold; font-size: 0.9rem; }
+        .type-select { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 10px; font-weight: bold; font-family: inherit; cursor: pointer; color: var(--royal-blue); outline: none; }
+
+        .estieab-box { background: #fff9c4 !important; border: 2px solid #fbc02d; border-radius: 12px; padding: 15px; margin-bottom: 15px; color: #000; font-weight: bold; line-height: 1.8; width: 100%; box-sizing: border-box; text-align: right; min-height: 90px; outline: none; white-space: pre-wrap; font-size: 1.15rem; }
+        .q-text-input { width: 100%; min-height: 60px; padding: 12px; border: 2px solid #cbd5e1; border-radius: 12px; color: inherit; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; outline: none; text-align: right; box-sizing: border-box; font-family: inherit; background: rgba(0,0,0,0.02); resize: none; }
+        .student-answer-textarea { width: 100%; min-height: 80px; padding: 12px; border: 2px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 1.05rem; outline: none; box-sizing: border-box; text-align: right; background: #fff; }
+
+        .matching-container, .enumeration-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+        @media (max-width: 768px) { .matching-container, .enumeration-container { grid-template-columns: 1fr; } }
+        .matching-box, .enumeration-box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 12px; box-sizing: border-box; }
+        .matching-row, .enum-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; flex-wrap: wrap; }
+        .matching-row input[type="text"] { flex: 1; min-width: 100px; }
+        .matching-row input[type="number"], .enum-row input[type="number"] { width: 50px; text-align: center; padding: 6px; border: 1px solid #10b981; border-radius: 6px; font-weight: bold; color: #166534; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 600px) { .options-grid { display: flex; flex-direction: column; } }
+        .opt-pair-row { display: flex; align-items: center; background: var(--card-bg); border: 1.5px solid #d1d5db; border-radius: 10px; padding: 12px; box-sizing: border-box; cursor: pointer; transition: 0.2s; gap: 8px; }
+        .opt-label { font-weight: bold; color: var(--royal-blue); white-space: nowrap; font-size: 1.05rem; flex-shrink: 0; }
+        .opt-word { width: 100%; border: none; outline: none; font-weight: bold; color: inherit; background: transparent; text-align: right; font-family: inherit; cursor: inherit; font-size: 1.05rem; }
+
+        .correct-ans-box { margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border: 1px solid #bbf7d0; text-align: right; box-sizing: border-box; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: space-between; }
+        .correct-input { flex: 1; background: transparent; border: none; outline: none; color: #166534; font-weight: bold; text-align: right; font-family: inherit; min-width: 200px; }
+        .q-score-input { width: 65px; padding: 5px; border: 1px solid #10b981; border-radius: 6px; text-align: center; font-weight: bold; color: #166534; font-family: inherit; }
+
+        body.student-mode .top-action-bar, body.student-mode .array-import-box, body.student-mode .search-result-box, body.student-mode .remove-btn, body.student-mode .type-select, body.student-mode .correct-ans-box, body.student-mode .admin-only { display: none !important; }
+        body.student-mode .selected-opt { background: rgba(59, 130, 246, 0.2) !important; border: 2px solid var(--royal-blue) !important; }
+
+        /* النوافذ والرسائل المخصصة العصرية */
+        #report-modal, #cloud-modal, #history-modal, #time-modal, #analytics-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 750px; max-height: 85%; background: #ffffff; color: #1e293b; z-index: 2000; border-radius: 20px; padding: 25px; overflow-y: auto; box-shadow: 0 0 50px rgba(0,0,0,0.4); box-sizing: border-box; }
+        #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1999; }
+        
+        .custom-alert-box { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 25px; border-radius: 30px; z-index: 3000; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: slideDown 0.3s ease; text-align: center; }
+        @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
+
+        .report-table { width: 100%; border-collapse: collapse; margin-top: 20px; overflow-x: auto; display: block; }
+        .report-table th, .report-table td { padding: 10px; border: 1px solid #e2e8f0; text-align: center; font-size: 0.9rem; }
+        .cloud-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #e2e8f0; gap: 10px; flex-wrap: wrap; }
+        .cloud-item:hover { background: #f8fafc; }
+    </style>
+</head>
+<body>
+
+    <div id="customToast" class="custom-alert-box">تنبيه النظام</div>
+    <div id="modal-overlay" onclick="closeModals()"></div>
+
+    <!-- نافذة تحليلات ورسوم بيانية للمعلم -->
+    <div id="analytics-modal">
+        <h2 style="text-align: center; color: var(--royal-blue); margin-top:0; font-size:1.3rem;"><i class="fas fa-chart-pie"></i> لوحة التحليلات والإحصائيات 📊</h2>
+        <div style="width: 100%; max-width: 400px; margin: 20px auto;">
+            <canvas id="analyticsChart"></canvas>
+        </div>
+        <div id="analytics-summary" style="text-align: center; font-weight: bold; margin-bottom: 20px; color: #475569;"></div>
+        <button class="btn" style="background:#64748b; width:100%; justify-content:center;" onclick="closeModals()"><i class="fas fa-times"></i> إغلاق</button>
+    </div>
+
+    <div id="cloud-modal">
+        <h2 style="text-align: center; color: var(--royal-blue); margin-top:0; font-size:1.3rem;"><i class="fas fa-cloud"></i> النماذج المحفوظة في السحاب</h2>
+        <div id="cloud-models-list" style="margin-top: 20px; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;"></div>
+        <button class="btn" style="background:#64748b; width:100%; margin-top:20px; justify-content:center;" onclick="closeModals()"><i class="fas fa-times"></i> إغلاق</button>
+    </div>
+
+    <div id="time-modal">
+        <h2 style="text-align: center; color: var(--royal-blue); font-size:1.3rem;"><i class="fas fa-clock"></i> تحديد موعد فتح وإغلاق الاختبار ⏳</h2>
+        <div style="margin: 20px 0; display: flex; flex-direction: column; gap: 15px;">
+            <div>
+                <label style="display: block; font-weight: bold; margin-bottom: 5px; color: var(--royal-blue);">تاريخ ووقت بدء الاختبار:</label>
+                <input type="datetime-local" id="examStartTime" style="width: 100%; padding: 12px; border: 2px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 1rem; box-sizing: border-box;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: bold; margin-bottom: 5px; color: var(--royal-blue);">تاريخ ووقت إغلاق الاختبار:</label>
+                <input type="datetime-local" id="examEndTime" style="width: 100%; padding: 12px; border: 2px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 1rem; box-sizing: border-box;">
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="btn" style="background: var(--success-green); flex: 1;" onclick="saveExamTimeSettings()"><i class="fas fa-save"></i> حفظ الموعد</button>
+            <button class="btn" style="background: #64748b;" onclick="closeModals()"><i class="fas fa-times"></i> إلغاء</button>
+        </div>
+    </div>
+
+    <div id="history-modal">
+        <h2 style="text-align: center; color: var(--royal-blue); font-size:1.3rem;"><i class="fas fa-history"></i> سجل نتائج الاختبارات 📊</h2>
+        <div id="history-list" style="margin-top: 20px;"></div>
+        <button class="btn" style="background:#64748b; width:100%; margin-top:20px; justify-content:center;" onclick="closeModals()"><i class="fas fa-times"></i> إغلاق السجل</button>
+    </div>
+
+    <div id="report-modal">
+        <h2 style="text-align: center; color: var(--royal-blue); font-size:1.3rem;" id="report-modal-title">تقرير أداء الطالب 🎯</h2>
+        <div id="score-summary" style="text-align: center; font-size: 1.2rem; font-weight: bold; margin: 15px 0;"></div>
+        <table class="report-table">
+            <thead>
+                <tr id="report-table-header"><th>#</th><th>السؤال</th><th>نوعه</th><th>إجابتك</th><th>الصحيحة</th><th>الدرجة</th></tr>
+            </thead>
+            <tbody id="report-body"></tbody>
+        </table>
+        <div id="save-review-btn-container" style="margin-top: 20px; text-align: center; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;"></div>
+        <button class="btn" style="background:#64748b; width:100%; margin-top:10px; justify-content:center;" onclick="closeModals()"><i class="fas fa-times"></i> إغلاق التقرير</button>
+    </div>
+
+    <div class="user-header" id="main-header">
+        <div class="header-right"><h2 class="user-name">أ. عبدالعزيز الفيفي</h2></div>
+        <div class="header-center"><div class="logo-box"><i class="fas fa-award"></i></div></div>
+        <div class="header-left"><p class="school-name">ثانوية الأمير عبدالمجيد 😉</p></div>
+    </div>
+
+    <div class="top-action-bar admin-only" id="admin-top-bar">
+        <div class="bar-group">
+            <span id="current-model-label" style="color: #38bdf8; font-weight: bold; font-size: 0.95rem; margin-left: 5px;">📁 نموذج جديد</span>
+            <div class="styled-dropdown-wrapper" id="mainActionsDropdown">
+                <button type="button" class="dropdown-toggle-btn" onclick="toggleDropdown(event)">
+                    <i class="fas fa-bars"></i> خيارات النماذج <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="dropdown-menu-content">
+                    <button type="button" onclick="startNewModel()"><i class="fas fa-plus-circle" style="color:#10b981;"></i> نموذج جديد</button>
+                    <button type="button" onclick="saveToCloud()"><i class="fas fa-save" style="color:#a855f7;"></i> حفظ النموذج</button>
+                    <button type="button" onclick="openTimeModal()"><i class="fas fa-clock" style="color:#f59e0b;"></i> توقيت الاختبار ⏰</button>
+                    <button type="button" onclick="copyCurrentModelLink()"><i class="fas fa-link" style="color:#06b6d4;"></i> رابط الطلاب</button>
+                    <button type="button" onclick="renameCurrentModel()"><i class="fas fa-signature" style="color:#fbbf24;"></i> إعادة تسمية</button>
+                    <button type="button" onclick="deleteCurrentModel()"><i class="fas fa-trash" style="color:#ef4444;"></i> حذف النموذج</button>
+                </div>
+            </div>
+        </div>
+        <div class="bar-group">
+            <button class="btn" style="background: #4f46e5;" onclick="loadFromCloud()"><i class="fas fa-folder-open"></i> فتح نموذج</button>
+            <button class="btn" style="background: #3b82f6;" onclick="addQuestion()"><i class="fas fa-plus"></i> سؤال</button>
+            <button class="btn btn-clear" title="مسح الكل" onclick="clearAll()"><i class="fas fa-eraser"></i></button>
+        </div>
+    </div>
+
+    <div id="student-auth-container" style="display:none;">
+        <div class="auth-card">
+            <h2 style="color: var(--royal-blue); margin-top: 0; font-size:1.4rem;"><i class="fas fa-user-graduate"></i> تسجيل دخول الطالب 🎓</h2>
+            <div id="student-exam-title-badge" style="background: #e0f2fe; color: #0369a1; padding: 10px 15px; border-radius: 10px; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; border: 1px solid #bae6fd; display: none;"></div>
+            <p style="color: #64748b; margin-bottom: 20px; font-size:0.95rem;">الرجاء إدخال إيميل منصة مدرستي المعتمد لبدء الاختبار:</p>
+            <input type="email" id="studentEmailInput" class="auth-input" placeholder="sxxxxxxx@rb.moe.gov.sa">
+            <br>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn" style="background: var(--success-green); padding: 12px 30px; font-size: 1.1rem;" onclick="verifyStudentEmail()"><i class="fas fa-rocket"></i> دخول المنصة 🚀</button>
+                <button class="btn" style="background: var(--royal-blue); padding: 12px 20px; font-size: 1rem;" onclick="openStudentHistory()"><i class="fas fa-history"></i> سجل اختباراتي 📊</button>
+            </div>
+            <p id="auth-status-msg" style="margin-top: 15px; font-weight: bold; font-size:0.95rem;"></p>
+        </div>
+    </div>
+
+    <div class="search-result-box admin-only">
+        <label style="display: block; font-weight: bold; color: #0284c7; margin-bottom: 8px; font-size:0.95rem;"><i class="fas fa-search"></i> استعلام وإحصائيات درجات الطلاب (خاص بالمعلم):</label>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <select id="teacherModelSelect" class="styled-select-input" style="flex: 1; margin: 0; font-size: 1rem; padding: 10px;">
+                <option value="">-- اختر النموذج المطلوب استعراضه --</option>
+            </select>
+            <button class="btn" style="background: #0284c7; padding: 10px 20px;" onclick="teacherSearchByModel()"><i class="fas fa-search"></i> استعراض النتائج</button>
+            <button class="btn" style="background: #10b981; padding: 10px 15px;" onclick="exportResultsToExcel()" title="تصدير إلى Excel"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+            <button class="btn" style="background: #7c3aed; padding: 10px 15px;" onclick="openAnalyticsModal()" title="إحصائيات ورسوم"><i class="fas fa-chart-pie"></i> التحليلات</button>
+        </div>
+    </div>
+
+    <div class="array-import-box admin-only">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label style="font-weight: bold; color: #0284c7; font-size:0.95rem;"><i class="fas fa-file-code"></i> مصفوفة الأسئلة البرمجية:</label>
+            <button class="btn" style="background:#10b981; padding:6px 12px; font-size:0.8rem;" onclick="copyArrayCode()"><i class="fas fa-copy"></i> نسخ المصفوفة</button>
+        </div>
+        <textarea id="arrayInputText" class="array-textarea" placeholder="[ { t: '...', q: '...', ... } ]"></textarea>
+        <button class="btn" style="background:#0284c7; width:100%; justify-content:center;" onclick="importArrayQuestions()"><i class="fas fa-magic"></i> توليد وتوزيع الأسئلة تلقائياً</button>
+    </div>
+
+    <div id="examTimerBanner" class="exam-timer-banner">
+        <div id="bannerExamTitle"><i class="fas fa-file-alt"></i> الاختبار: --</div>
+        <div id="bannerTimeCountdown" style="color: #f59e0b;"><i class="fas fa-hourglass-half"></i> الوقت المتبقي: جاري الحساب...</div>
+    </div>
+
+    <div class="container" id="quiz-content"></div>
+
+    <div id="student-actions" style="display: none; text-align: center; margin-bottom: 50px; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button id="main-grade-btn" class="btn" style="background:#10b981; padding:15px 30px" onclick="gradeExam()"><i class="fas fa-graduation-cap"></i> انتهيت.. اعتماد النتيجة</button>
+        <button class="btn" style="background:var(--royal-blue); padding:15px 25px;" onclick="openStudentHistory()"><i class="fas fa-history"></i> سجل اختباراتي السابقة 📊</button>
+    </div>
+
+    <script>
+        let authenticatedStudentEmail = "";
+        let authenticatedStudentName = "";
+        let loadedExamQuestions = null;
+        let currentOpenModelName = null;
+        let currentExamStartTime = "";
+        let currentExamEndTime = "";
+        let examTimerInterval = null;
+        let antiCheatViolations = 0;
+        let analyticsChartInstance = null;
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAVrIim7aXjg0hGrMk0qVrXT8geRIpHoBk",
+            authDomain: "youy-apps.firebaseapp.com",
+            databaseURL: "https://youy-apps-default-rtdb.firebaseio.com",
+            projectId: "youy-apps"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+        const firestoreConfig = {
+            apiKey: "AIzaSyBkCO7FDQXd89YDf843J4_AtvEFvzzt-R0",
+            authDomain: "aztlg-494c3.firebaseapp.com",
+            projectId: "aztlg-494c3"
+        };
+        const secondaryApp = firebase.apps.length > 1 ? firebase.apps[1] : firebase.initializeApp(firestoreConfig, "secondary");
+        const fsDb = secondaryApp.firestore();
+        const rtdb = firebase.database();
+
+        // نظام التنبيهات الاحترافي بدلاً من الـ alert
+        function showToast(msg, duration = 3000) {
+            const toast = document.getElementById('customToast');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, duration);
+        }
+
+        // منع الغش بالخروج من التبويب
+        document.addEventListener("visibilitychange", function() {
+            if (document.body.classList.contains('student-mode') && document.hidden) {
+                antiCheatViolations++;
+                showToast(`⚠️ تحذير أمني (${antiCheatViolations}): تم رصد خروجك من صفحة الاختبار!`);
+            }
+        });
+
+        // تعطيل زر الماوس الأيمن والنسخ أثناء حل الطالب
+        document.addEventListener('contextmenu', e => { if(document.body.classList.contains('student-mode')) e.preventDefault(); });
+        document.addEventListener('copy', e => { if(document.body.classList.contains('student-mode')) e.preventDefault(); });
+
+        function toggleDropdown(event) {
+            event.stopPropagation();
+            document.getElementById('mainActionsDropdown').classList.toggle('active');
+        }
+        window.addEventListener('click', () => {
+            const w = document.getElementById('mainActionsDropdown');
+            if (w) w.classList.remove('active');
+        });
+
+        function autoResizeTextarea(el) {
+            el.style.height = 'auto';
+            el.style.height = (el.scrollHeight) + 'px';
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        async function populateTeacherModelDropdown() {
+            const selectEl = document.getElementById('teacherModelSelect');
+            if (!selectEl) return;
+            selectEl.innerHTML = '<option value="">-- جاري التحميل... --</option>';
+
+            let savedModels = JSON.parse(localStorage.getItem('fifi_all_saved_models') || '{}');
+            let modelNamesSet = new Set(Object.keys(savedModels));
+
+            try {
+                const snap = await rtdb.ref('models').once('value');
+                if (snap.exists()) Object.keys(snap.val()).forEach(name => modelNamesSet.add(name));
+            } catch(e) {}
+
+            try {
+                const fsSnap = await fsDb.collection("alkfaeat_results").get();
+                fsSnap.forEach(doc => { if (doc.data().model_id) modelNamesSet.add(doc.data().model_id); });
+            } catch(e) {}
+
+            selectEl.innerHTML = '<option value="">-- اختر النموذج المطلوب استعراضه --</option>';
+            Array.from(modelNamesSet).sort().forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        function openTimeModal() {
+            if (!currentOpenModelName) { showToast("الرجاء حفظ النموذج أولاً لتحديد وقته!"); return; }
+            document.getElementById('examStartTime').value = currentExamStartTime || '';
+            document.getElementById('examEndTime').value = currentExamEndTime || '';
+            document.getElementById('time-modal').style.display = 'block';
+            document.getElementById('modal-overlay').style.display = 'block';
+        }
+
+        async function saveExamTimeSettings() {
+            currentExamStartTime = document.getElementById('examStartTime').value;
+            currentExamEndTime = document.getElementById('examEndTime').value;
+            if (currentOpenModelName) {
+                let savedModels = JSON.parse(localStorage.getItem('fifi_all_saved_models') || '{}');
+                if (savedModels[currentOpenModelName]) {
+                    savedModels[currentOpenModelName].startTime = currentExamStartTime;
+                    savedModels[currentOpenModelName].endTime = currentExamEndTime;
+                    localStorage.setItem('fifi_all_saved_models', JSON.stringify(savedModels));
+                }
+                try {
+                    await rtdb.ref('models/' + currentOpenModelName).update({ startTime: currentExamStartTime, endTime: currentExamEndTime });
+                } catch(e) {}
+                showToast("تم حفظ توقيت الاختبار بنجاح! ⏰");
+            }
+            closeModals();
+        }
+
+        function startStudentCountdownTimer() {
+            if (!currentExamEndTime) return;
+            const endTimeMs = new Date(currentExamEndTime).getTime();
+            if (examTimerInterval) clearInterval(examTimerInterval);
+            examTimerInterval = setInterval(() => {
+                const distance = endTimeMs - new Date().getTime();
+                if (distance < 0) {
+                    clearInterval(examTimerInterval);
+                    document.getElementById('bannerTimeCountdown').innerHTML = "⌛ انتهى وقت الاختبار!";
+                    showToast("انتهى وقت الاختبار المحدد!");
+                    return;
+                }
+                const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((distance % (1000 * 60)) / 1000);
+                document.getElementById('bannerTimeCountdown').innerHTML = `<i class="fas fa-hourglass-half"></i> المتبقي: ${h > 0 ? h + 'س و ' : ''}${m}د ${s}ث`;
+            }, 1000);
+        }
+
+        function startNewModel() {
+            if(confirm("هل ترغب في البدء بنموذج جديد؟ سيتم تفريغ الأسئلة الحالية.")) {
+                document.getElementById('quiz-content').innerHTML = '';
+                document.getElementById('arrayInputText').value = '';
+                localStorage.removeItem('fifi_final_v_secured');
+                currentOpenModelName = null;
+                currentExamStartTime = "";
+                currentExamEndTime = "";
+                document.getElementById('current-model-label').innerText = "📁 نموذج جديد";
+                addQuestion();
+            }
+        }
+
+        function addQuestion(data = null) {
+            const container = document.getElementById('quiz-content');
+            const card = document.createElement('div');
+            card.className = `question-card`;
+            const isStudent = document.body.classList.contains('student-mode');
+            const qTextVal = data ? (data.text || "") : "";
+            const qTextAreaVal = data ? (data.text_area || "") : "";
+            const correctAnsVal = data ? (data.ans || "") : "";
+            const selectedType = data ? (data.qType || data.type || "اختر الإجابة الصحيحة") : "اختر الإجابة الصحيحة";
+            const qScoreVal = data && data.score !== undefined ? data.score : 1;
+            const fullQuestionText = (selectedType === 'استخرج من النص' && qTextAreaVal) ? (qTextAreaVal + "\n\n" + qTextVal) : qTextVal;
+
+            card.innerHTML = `
+                <div class="card-meta">
+                    <span class="q-number-badge"></span>
+                    <select class="type-select" onchange="changeQuestionType(this);">
+                        <option value="اختر الإجابة الصحيحة" ${selectedType === 'اختر الإجابة الصحيحة' ? 'selected' : ''}>اختر الإجابة الصحيحة (٤ خيارات)</option>
+                        <option value="صح وخطأ" ${selectedType === 'صح وخطأ' ? 'selected' : ''}>صح وخطأ</option>
+                        <option value="سؤال مزاوجة (توصيل)" ${selectedType.includes('مزاوجة') ? 'selected' : ''}>سؤال مزاوجة (توصيل)</option>
+                        <option value="عددّد (نقاط متعددة)" ${selectedType.includes('عددّد') ? 'selected' : ''}>عددّد (نقاط متعددة)</option>
+                        <option value="استخرج من النص" ${selectedType.includes('استخرج') ? 'selected' : ''}>استخرج من النص</option>
+                        <option value="أكمل/أعرب/مثل" ${['أكمل/أعرب/مثل','k_fill','k_irab','k_sentence'].includes(selectedType) ? 'selected' : ''}>أكمل/أعرب/مثل</option>
+                        <option value="عرّف" ${selectedType === 'عرّف' ? 'selected' : ''}>عرّف</option>
+                        <option value="اذكر" ${selectedType === 'اذكر' ? 'selected' : ''}>اذكر</option>
+                        <option value="صحح الخطأ" ${selectedType === 'صحح الخطأ' ? 'selected' : ''}>صحح الخطأ</option>
+                    </select>
+                    <i class="fas fa-times-circle remove-btn" style="color:#cbd5e1; cursor:pointer; font-size:1.3rem;" onclick="this.closest('.question-card').remove();updateNumbers();saveAll();"></i>
+                </div>
+                <div class="q-area">
+                    ${selectedType === 'استخرج من النص' ? `<div class="estieab-box" ${isStudent ? 'contenteditable="false"' : 'contenteditable="true" oninput="saveAll()"'}>${qTextAreaVal || "أدخل النص المراد الاستخراج منه هنا..."}</div>` : ''}
+                    ${isStudent ? `<div class="q-text-input" style="cursor:default; height:auto;">${qTextVal}</div>` : `<textarea class="q-text-input q-main" placeholder="اكتب السؤال هنا..." oninput="autoResizeTextarea(this); saveAll();">${qTextVal}</textarea>`}
+                </div>
+                <div class="ans-grid-area">${renderOptionsByType(selectedType, data, isStudent)}</div>
+                <div class="correct-ans-box admin-only">
+                    <input type="text" placeholder="الإجابة الصحيحة" class="correct-input ans-val" value="${correctAnsVal}" oninput="saveAll()">
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <span style="font-size:0.85rem; font-weight:bold; color:#166534;">درجة السؤال:</span>
+                        <input type="number" min="0.5" step="0.5" class="q-score-input" value="${qScoreVal}" oninput="saveAll()">
+                    </div>
+                </div>
+                <input type="hidden" class="hidden-correct-ans" value="${correctAnsVal}">
+                <input type="hidden" class="hidden-q-text" value="${fullQuestionText}">
+            `;
+            container.appendChild(card);
+            if(card.querySelector('.opt-pair-row')) bindOptionClickEvents(card, isStudent);
+            card.querySelectorAll('textarea').forEach(ta => autoResizeTextarea(ta));
+            updateNumbers();
+            if(!isStudent) saveAll();
+        }
+
+        function changeQuestionType(selectEl) {
+            const card = selectEl.closest('.question-card');
+            const type = selectEl.value;
+            const qArea = card.querySelector('.q-area');
+            if (type === 'استخرج من النص' && !card.querySelector('.estieab-box')) {
+                const estBox = document.createElement('div');
+                estBox.className = 'estieab-box'; estBox.contentEditable = 'true'; estBox.innerText = 'أدخل النص...';
+                estBox.oninput = saveAll; qArea.insertBefore(estBox, qArea.firstChild);
+            } else if (type !== 'استخرج من النص') {
+                const eb = card.querySelector('.estieab-box'); if (eb) eb.remove();
+            }
+            card.querySelector('.ans-grid-area').innerHTML = renderOptionsByType(type, null, false);
+            bindOptionClickEvents(card, false);
+            saveAll();
+        }
+
+        function renderOptionsByType(type, data, isStudent) {
+            if (type === 'صح وخطأ') {
+                let opts = ['صح', 'خطأ']; if (isStudent) opts = shuffleArray(opts);
+                return `<div class="options-grid"><div class="opt-pair-row"><input type="text" class="opt-word opt" readonly value="${opts[0]}" style="text-align:center;"></div><div class="opt-pair-row"><input type="text" class="opt-word opt" readonly value="${opts[1]}" style="text-align:center;"></div></div>`;
+            } else if (type.includes('مزاوجة')) {
+                let leftOpts = data?.opts || ['', '']; let rightOpts = data?.rightOpts || ['', ''];
+                let studentAns = data?.studentAns || {}; let subScores = data?.subScores || leftOpts.map(() => 1);
+                let leftHtml = `<div class="matching-box"><h4 style="margin:0 0 10px; color:var(--royal-blue); font-size:1rem;">الفقرات:</h4>`;
+                leftOpts.forEach((item, idx) => {
+                    let sVal = studentAns[idx] || ''; let subScoreVal = subScores[idx] || 1;
+                    leftHtml += `<div class="matching-row" data-subscore="${subScoreVal}">
+                        ${!isStudent ? `<input type="text" class="opt opt-left" value="${item}" placeholder="فقرة ${idx+1}" oninput="saveAll()" style="padding:6px; border:1px solid #cbd5e1; border-radius:6px;">` : `<span>${idx+1})${item}</span>`}
+                        ${!isStudent ? `<input type="number" min="0.5" step="0.5" class="sub-score-input" value="${subScoreVal}" oninput="saveAll()">` : ''}
+                        <input type="text" class="matching-ans-input" data-left-idx="${idx}" ${isStudent ? '' : 'disabled placeholder="رقم"'} value="${sVal}" style="width:50px; text-align:center; padding:6px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;" maxlength="2">
+                    </div>`;
+                });
+                if(!isStudent) leftHtml += `<button type="button" class="btn" style="background:#3b82f6; padding:6px 12px; font-size:0.85rem; margin-top:5px;" onclick="adjustMatchingRows(this, 'left', 1)"><i class="fas fa-plus"></i> فقرة</button>`;
+                leftHtml += '</div>';
+
+                let rightHtml = `<div class="matching-box"><h4 style="margin:0 0 10px; color:var(--royal-blue); font-size:1rem;">الإجابات:</h4>`;
+                rightOpts.forEach((item, idx) => {
+                    rightHtml += `<div class="matching-row"><span style="font-weight:bold; color:#0284c7;">${idx+1}.</span>${!isStudent ? `<input type="text" class="opt opt-right" value="${item}" oninput="saveAll()" style="padding:6px; border:1px solid #cbd5e1; border-radius:6px;">` : `<span>${item}</span>`}</div>`;
+                });
+                if(!isStudent) rightHtml += `<button type="button" class="btn" style="background:#3b82f6; padding:6px 12px; font-size:0.85rem; margin-top:5px;" onclick="adjustMatchingRows(this, 'right', 1)"><i class="fas fa-plus"></i> إجابة</button>`;
+                rightHtml += '</div>';
+                return `<div class="matching-container">${leftHtml}${rightHtml}</div>`;
+            } else if (type.includes('عددّد')) {
+                let enumItems = data?.opts || ['', '']; let subScores = data?.subScores || enumItems.map(() => 1);
+                let studentAns = data?.studentAns || {};
+                let html = `<div style="width:100%; background:#f8fafc; border:1px solid #cbd5e1; padding:15px; border-radius:12px;"><h4 style="margin:0 0 10px; color:var(--royal-blue); font-size:1rem;">عناصر التعداد:</h4>`;
+                enumItems.forEach((item, idx) => {
+                    let sVal = studentAns[idx] || ''; let subScoreVal = subScores[idx] || 1;
+                    html += `<div class="enum-row" data-subscore="${subScoreVal}" style="margin-bottom:8px;">
+                        <span>${idx+1}.</span>
+                        ${!isStudent ? `<input type="text" class="enum-label-input" value="${item}" oninput="saveAll()" style="padding:6px; border:1px solid #cbd5e1; border-radius:6px; flex:1;">` : ''}
+                        ${!isStudent ? `<input type="number" min="0.5" step="0.5" class="sub-score-input" value="${subScoreVal}" oninput="saveAll()">` : ''}
+                        <input type="text" class="enum-ans-input" data-enum-idx="${idx}" ${isStudent ? '' : 'disabled placeholder="إجابة الطالب"'} value="${sVal}" style="flex:2; padding:6px; border:1px solid #cbd5e1; border-radius:6px;">
+                    </div>`;
+                });
+                if(!isStudent) html += `<button type="button" class="btn" style="background:#3b82f6; padding:6px 12px; font-size:0.85rem;" onclick="adjustEnumRows(this, 1)"><i class="fas fa-plus"></i> عنصر</button>`;
+                return html + `</div>`;
+            } else if (['عرّف', 'اذكر', 'صحح الخطأ', 'استخرج من النص', 'أكمل/أعرب/مثل'].includes(type) || ['k_fill','k_irab','k_sentence','k_extract'].includes(type)) {
+                return `<div><textarea class="student-answer-textarea" ${isStudent ? '' : 'disabled placeholder="إجابة الطالب التحريرية..."'}>${(isStudent && data?.studentAns) ? data.studentAns : ''}</textarea></div>`;
+            } else {
+                let opts = data?.opts ? [...data.opts] : ['', '', '', ''];
+                const labels = ['أ) ', 'ب) ', 'ج) ', 'د) '];
+                if (isStudent) opts = shuffleArray(opts);
+                let h = '<div class="options-grid">';
+                for(let i=0; i<opts.length; i++) {
+                    h += `<div class="opt-pair-row"><span class="opt-label">${labels[i]||(i+1)+') '}</span><input type="text" class="opt-word opt" ${isStudent ? 'readonly' : ''} value="${opts[i]||''}" oninput="saveAll()"></div>`;
+                }
+                return h + '</div>';
+            }
+        }
+
+        function adjustMatchingRows(btn, side, change) {
+            const card = btn.closest('.question-card');
+            let leftOpts = []; let rightOpts = []; let subScores = [];
+            card.querySelectorAll('.opt-left').forEach(i => leftOpts.push(i.value));
+            card.querySelectorAll('.sub-score-input').forEach(i => subScores.push(parseFloat(i.value)||1));
+            card.querySelectorAll('.opt-right').forEach(i => rightOpts.push(i.value));
+            if (side === 'left') { if(change>0) {leftOpts.push(''); subScores.push(1);} else if(leftOpts.length>1) {leftOpts.pop(); subScores.pop();} }
+            else { if(change>0) rightOpts.push(''); else if(rightOpts.length>1) rightOpts.pop(); }
+            card.querySelector('.ans-grid-area').innerHTML = renderOptionsByType('سؤال مزاوجة (توصيل)', { opts: leftOpts, rightOpts: rightOpts, subScores: subScores }, false);
+            saveAll();
+        }
+
+        function adjustEnumRows(btn, change) {
+            const card = btn.closest('.question-card');
+            let enumItems = []; let subScores = [];
+            card.querySelectorAll('.enum-label-input').forEach(i => enumItems.push(i.value));
+            card.querySelectorAll('.sub-score-input').forEach(i => subScores.push(parseFloat(i.value)||1));
+            if(change>0) {enumItems.push(''); subScores.push(1);} else if(enumItems.length>1) {enumItems.pop(); subScores.pop();}
+            card.querySelector('.ans-grid-area').innerHTML = renderOptionsByType('عددّد (نقاط متعددة)', { opts: enumItems, subScores: subScores }, false);
+            saveAll();
+        }
+
+        function bindOptionClickEvents(card, isStudent) {
+            card.querySelectorAll('.opt-pair-row').forEach(row => {
+                row.onclick = () => {
+                    const examId = new URLSearchParams(window.location.search).get('exam');
+                    if (examId && localStorage.getItem('submitted_' + examId) === 'true') return;
+                    if (isStudent) {
+                        card.querySelectorAll('.opt-pair-row').forEach(r => r.classList.remove('selected-opt'));
+                        row.classList.add('selected-opt');
+                    }
+                };
+            });
+        }
+
+        function importArrayQuestions() {
+            let rawData = document.getElementById('arrayInputText').value.trim();
+            if (!rawData) { showToast("الرجاء لصق المصفوفة أولاً!"); return; }
+            try {
+                let cleanText = rawData.replace(/\/\/.*/g, '').replace(/^\s*(const|let|var)\s+[\w]+\s*=\s*/, '').trim();
+                let arr = eval('(' + cleanText.substring(cleanText.indexOf('['), cleanText.lastIndexOf(']') + 1) + ')');
+                if (!Array.isArray(arr)) throw new Error();
+                document.getElementById('quiz-content').innerHTML = '';
+                arr.forEach(item => {
+                    addQuestion({ text: item.q || item.text || "", text_area: item.text_area || "", opts: item.opts || item.matchA || [], rightOpts: item.rightOpts || item.matchB || [], subScores: item.subScores || [], ans: item.ans || "", qType: item.t || item.type || "اختر الإجابة الصحيحة", score: item.score || 1 });
+                });
+                saveAll();
+                showToast(`تم استيراد ${arr.length} سؤالاً بنجاح!`);
+            } catch (e) { showToast("خطأ في قراءة المصفوفة البرمجية."); }
+        }
+
+        function copyArrayCode() {
+            navigator.clipboard.writeText(document.getElementById('arrayInputText').value);
+            showToast("تم نسخ كود المصفوفة بنجاح! 📋");
+        }
+
+        async function verifyStudentEmail() {
+            const emailInput = document.getElementById('studentEmailInput').value.trim().toLowerCase();
+            const msgEl = document.getElementById('auth-status-msg');
+            if (!emailInput || !emailInput.includes('@')) { msgEl.style.color = "var(--q-red)"; msgEl.innerText = "أدخل إيميل مدرستي صحيح."; return; }
+            
+            msgEl.style.color = "var(--royal-blue)"; msgEl.innerText = "جاري التحقق... ⏳";
+            try {
+                const docRef = await fsDb.collection("allowed_students").doc(emailInput).get();
+                if (!docRef.exists) { msgEl.style.color = "var(--q-red)"; msgEl.innerText = "❌ هذا الإيميل غير مسجل في قائمة طلاب المدرسة!"; return; }
+                
+                authenticatedStudentEmail = emailInput;
+                authenticatedStudentName = docRef.data().name || "طالب";
+                const examId = new URLSearchParams(window.location.search).get('exam');
+                
+                const prevResult = await fsDb.collection("alkfaeat_results").where("email", "==", authenticatedStudentEmail).where("model_id", "==", examId).get();
+                if (!prevResult.empty) { msgEl.style.color = "var(--q-red)"; msgEl.innerText = `عذراً، لقد أديت هذا الاختبار مسبقاً.`; return; }
+
+                document.getElementById('student-auth-container').style.display = 'none';
+                document.querySelector('.container').style.display = 'block';
+                document.getElementById('student-actions').style.display = 'flex';
+                document.getElementById('examTimerBanner').style.display = 'flex';
+                startStudentCountdownTimer();
+                showToast(`أهلاً بك يا ${authenticatedStudentName} 🌟`);
+            } catch (err) { msgEl.style.color = "var(--q-red)"; msgEl.innerText = "حدث خطأ في الاتصال."; }
+        }
+
+        async function teacherSearchByModel() {
+            const modelName = document.getElementById('teacherModelSelect').value.trim();
+            if (!modelName) { showToast("اختر النموذج أولاً!"); return; }
+            fetchAndShowHistoryByModel(modelName);
+        }
+
+        async function openStudentHistory() {
+            let email = authenticatedStudentEmail || document.getElementById('studentEmailInput').value.trim().toLowerCase();
+            if (!email) { showToast("أدخل إيميلك أولاً لعرض سجلك!"); return; }
+            fetchAndShowHistoryByStudent(email);
+        }
+
+        async function fetchAndShowHistoryByStudent(email) {
+            const listEl = document.getElementById('history-list');
+            listEl.innerHTML = "<p style='text-align:center;'>جاري جلب النتائج...</p>";
+            document.getElementById('history-modal').style.display = 'block';
+            document.getElementById('modal-overlay').style.display = 'block';
+            const snap = await fsDb.collection("alkfaeat_results").where("email", "==", email).get();
+            if (snap.empty) { listEl.innerHTML = "<p style='text-align:center;'>لا توجد نتائج مسجلة.</p>"; return; }
+            listEl.innerHTML = '<div></div>'; const div = listEl.querySelector('div');
+            snap.forEach(doc => {
+                let d = doc.data();
+                div.innerHTML += `<div class="cloud-item"><div style="font-weight:bold; color:var(--royal-blue);">نموذج: ${d.model_id} | النتيجة: ${d.score} من ${d.total}</div><button class="btn" style="background:#a855f7; padding:6px;" onclick='showNormalReport("${encodeURIComponent(JSON.stringify(d.answers))}", ${d.score}, ${d.total})'>التقرير</button></div>`;
+            });
+        }
+
+        async function fetchAndShowHistoryByModel(modelName) {
+            const listEl = document.getElementById('history-list');
+            listEl.innerHTML = "<p style='text-align:center;'>جاري جلب النتائج...</p>";
+            document.getElementById('history-modal').style.display = 'block';
+            document.getElementById('modal-overlay').style.display = 'block';
+            const snap = await fsDb.collection("alkfaeat_results").where("model_id", "==", modelName).get();
+            if (snap.empty) { listEl.innerHTML = "<p style='text-align:center;'>لا توجد نتائج مسجلة لهذا النموذج.</p>"; return; }
+            listEl.innerHTML = '<div></div>'; const div = listEl.querySelector('div');
+            snap.forEach(doc => {
+                let d = doc.data();
+                div.innerHTML += `<div class="cloud-item"><div style="font-weight:bold; color:var(--royal-blue);">${d.name} (${d.email}) | النتيجة: ${d.score}/${d.total}</div><button class="btn" style="background:#a855f7; padding:6px;" onclick='openEditableReport("${doc.id}", "${encodeURIComponent(JSON.stringify(d.answers))}", ${d.score}, ${d.total})'>مراجعة</button></div>`;
+            });
+        }
+
+        // ميزة تصدير النتائج إلى Excel (CSV)
+        async function exportResultsToExcel() {
+            const modelName = document.getElementById('teacherModelSelect').value.trim();
+            if (!modelName) { showToast("اختر النموذج المطلوب لتصدير نتائجه!"); return; }
+            const snap = await fsDb.collection("alkfaeat_results").where("model_id", "==", modelName).get();
+            if (snap.empty) { showToast("لا توجد نتائج لتصديرها."); return; }
+            
+            let csvContent = "\uFEFFاسم الطالب,البريد الإلكتروني,الدرجة,الدرجة الكلية,النموذج\n";
+            snap.forEach(doc => {
+                let d = doc.data();
+                csvContent += `"${d.name}","${d.email}",${d.score},${d.total},"${d.model_id}"\n`;
+            });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `نتائج_اختبار_${modelName}.csv`;
+            a.click();
+            showToast("تم تصدير ملف النتائج بنجاح! 📊");
+        }
+
+        // لوحة التحليلات ورسوم Chart.js
+        async function openAnalyticsModal() {
+            const modelName = document.getElementById('teacherModelSelect').value.trim();
+            if (!modelName) { showToast("اختر النموذج أولاً لعرض التحليلات!"); return; }
+            const snap = await fsDb.collection("alkfaeat_results").where("model_id", "==", modelName).get();
+            if (snap.empty) { showToast("لا توجد بيانات كافية للتحليل."); return; }
+
+            let passed = 0, failed = 0, totalStudents = 0, sumScores = 0;
+            snap.forEach(doc => {
+                let d = doc.data(); totalStudents++; sumScores += d.score;
+                if ((d.score / d.total) >= 0.5) passed++; else failed++;
+            });
+
+            document.getElementById('analytics-summary').innerText = `إجمالي المتقدمين: ${totalStudents} طالب | متوسط الدرجات: ${(sumScores/totalStudents).toFixed(1)}`;
+            document.getElementById('analytics-modal').style.display = 'block';
+            document.getElementById('modal-overlay').style.display = 'block';
+
+            const ctx = document.getElementById('analyticsChart').getContext('2d');
+            if (analyticsChartInstance) analyticsChartInstance.destroy();
+            analyticsChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['ناجحون (>=50%)', 'دون النصف'],
+                    datasets: [{ data: [passed, failed], backgroundColor: ['#10b981', '#ef4444'] }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function showNormalReport(encodedAnswers, score, total) {
+            closeModals();
+            const answersArray = JSON.parse(decodeURIComponent(encodedAnswers));
+            document.getElementById('report-modal-title').innerText = "تقرير أداء الطالب 🎯";
+            document.getElementById('report-table-header').innerHTML = "<th>#</th><th>السؤال</th><th>نوعه</th><th>إجابتك</th><th>الصحيحة</th><th>الدرجة</th>";
+            const report = document.getElementById('report-body'); report.innerHTML = "";
+            answersArray.forEach((ans, i) => {
+                report.innerHTML += `<tr><td>${i+1}</td><td>${ans.qText}</td><td>${ans.qType}</td><td>${ans.studentAns}</td><td>${ans.correctAns}</td><td>${ans.earnedScore}/${ans.maxScore}</td></tr>`;
+            });
+            document.getElementById('score-summary').innerText = `النتيجة الإجمالية: ${score} من ${total}`;
+            document.getElementById('save-review-btn-container').innerHTML = "";
+            document.getElementById('report-modal').style.display = 'block';
+            document.getElementById('modal-overlay').style.display = 'block';
+        }
+
+        function openEditableReport(docId, encodedAnswers, score, total) {
+            closeModals();
+            const answersArray = JSON.parse(decodeURIComponent(encodedAnswers));
+            document.getElementById('report-modal-title').innerText = "مراجعة وتعديل درجات الطالب (للمعلم) 🎯";
+            document.getElementById('report-table-header').innerHTML = "<th>#</th><th>السؤال</th><th>إجابة الطالب</th><th>الدرجة</th>";
+            const report = document.getElementById('report-body'); report.innerHTML = "";
+            answersArray.forEach((ans, i) => {
+                report.innerHTML += `<tr><td>${i+1}</td><td>${ans.qText}</td><td>${ans.studentAns}</td><td><input type="number" step="0.5" class="score-edit-input" data-index="${i}" value="${ans.earnedScore}" style="width:55px; text-align:center;"> (من ${ans.maxScore})</td></tr>`;
+            });
+            document.getElementById('score-summary').innerText = `النتيجة الإجمالية الحالية: ${score} من ${total}`;
+            document.getElementById('save-review-btn-container').innerHTML = `<button class="btn" style="background:#10b981;" onclick="saveGradeChanges('${docId}', ${total})">حفظ التعديلات</button>`;
+            document.getElementById('report-modal').style.display = 'block';
+            document.getElementById('modal-overlay').style.display = 'block';
+        }
+
+        async function saveGradeChanges(docId, total) {
+            const inputs = document.querySelectorAll('.score-edit-input'); let newScore = 0;
+            const docRef = fsDb.collection("alkfaeat_results").doc(docId);
+            const snap = await docRef.get(); let answersArray = snap.data().answers || [];
+            inputs.forEach((inp, idx) => {
+                let val = parseFloat(inp.value) || 0; newScore += val;
+                answersArray[idx].earnedScore = val; answersArray[idx].maxScore = answersArray[idx].maxScore;
+            });
+            await docRef.update({ score: newScore, answers: answersArray });
+            showToast(`تم حفظ التعديلات! النتيجة المحدثة: ${newScore}/${total}`);
+            closeModals();
+        }
+
+        async function gradeExam() {
+            if (examTimerInterval) clearInterval(examTimerInterval);
+            const cards = document.querySelectorAll('.question-card');
+            let totalScore = 0, totalPossible = 0, details = [];
+            cards.forEach(c => {
+                const qTxt = c.querySelector('.hidden-q-text')?.value || "سؤال";
+                const qType = c.querySelector('.type-select')?.value || "اختر الإجابة الصحيحة";
+                const correctKey = c.querySelector('.hidden-correct-ans')?.value.trim() || c.querySelector('.ans-val')?.value.trim() || "";
+                const maxS = parseFloat(c.querySelector('.q-score-input')?.value) || 1;
+                totalPossible += maxS;
+                
+                let selWord = c.querySelector('.selected-opt .opt')?.value || c.querySelector('.student-answer-textarea')?.value.trim() || "";
+                let isCorrect = (selWord.toLowerCase() === correctKey.toLowerCase() && correctKey !== "");
+                let earned = isCorrect ? maxS : 0;
+                totalScore += earned;
+
+                details.push({ qText: qTxt, qType: qType, studentAns: selWord, correctAns: correctKey, maxScore: maxS, earnedScore: earned });
+            });
+
+            const examId = new URLSearchParams(window.location.search).get('exam') || "اختبار عام";
+            try {
+                await fsDb.collection("alkfaeat_results").add({
+                    name: authenticatedStudentName, email: authenticatedStudentEmail,
+                    score: totalScore, total: totalPossible, model_id: examId, answers: details,
+                    violations: antiCheatViolations, time: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                localStorage.setItem('submitted_' + examId, 'true');
+                document.getElementById('examTimerBanner').style.display = 'none';
+                document.getElementById('student-actions').innerHTML = `<div style="background:#dcfce7; color:#166534; padding:20px; border-radius:12px; font-weight:bold; width:100%; text-align:center;">🎉 تم إرسال واعتماد النتيجة بنجاح!<br>درجتك: ${totalScore} من ${totalPossible}</div>`;
+                showToast("تم اعتماد النتيجة بنجاح!");
+            } catch (err) { showToast("حدث خطأ أثناء الإرسال."); }
+        }
+
+        function loadFromCloud() {
+            let savedModels = JSON.parse(localStorage.getItem('fifi_all_saved_models') || '{}');
+            rtdb.ref('models').once('value', snapshot => {
+                const cloudMs = snapshot.val() || {};
+                let combinedNames = Array.from(new Set([...Object.keys(savedModels), ...Object.keys(cloudMs)]));
+                const listContainer = document.getElementById('cloud-models-list'); listContainer.innerHTML = "";
+                if(combinedNames.length === 0) { listContainer.innerHTML = "<p style='text-align:center; padding:20px;'>لا توجد نماذج محفوظة.</p>"; }
+                else {
+                    combinedNames.forEach(name => {
+                        listContainer.innerHTML += `<div class="cloud-item"><div style="font-weight:bold; color:var(--royal-blue);">${name}</div><div><button class="btn" style="background:#a855f7; padding:6px;" onclick="openModel('${name}')">فتح</button><button class="btn" style="background:#ef4444; padding:6px;" onclick="deleteSpecificModel('${name}')">حذف</button></div></div>`;
+                    });
+                }
+                document.getElementById('cloud-modal').style.display = 'block';
+                document.getElementById('modal-overlay').style.display = 'block';
+            });
+        }
+
+        async function deleteSpecificModel(name) {
+            if(confirm(`حذف النموذج "${name}"؟`)) {
+                let saved = JSON.parse(localStorage.getItem('fifi_all_saved_models') || '{}');
+                delete saved[name]; localStorage.setItem('fifi_all_saved_models', JSON.stringify(saved));
+                try { await rtdb.ref('models/' + name).remove(); } catch(e){}
+                showToast("تم الحذف بنجاح.");
+                loadFromCloud(); populateTeacherModelDropdown();
+            }
+        }
+
+        async function openModel(name) {
+            let saved = JSON.parse(localStorage.getItem('fifi_all_saved_models') || '{}');
+            if (saved[name]) {
+                currentOpenModelName = name; currentExamStartTime = saved[name].startTime || ""; currentExamEndTime = saved[name].endTime || "";
+                document.getElementById('current-model-label').innerText = `📁 ${name}`;
+                document.getElementById('quiz-content').innerHTML = "";
+                saved[name].data.forEach(q => addQuestion(q));
+                closeModals(); return;
+            }
+            rtdb.ref('models/' + name).once('value', s => {
+                if(s.val()) {
+                    currentOpenModelName = name; currentExamStartTime = s.val().startTime || ""; currentExamEndTime = s.val().endTime || "";
+                    document.getElementById('current-model-label').innerText = `📁 ${name}`;
+                    document.getElementById('quiz-content').innerHTML = "";
+                    s.val().data.forEach(q => addQuestion(q));
+                    closeModals();
+                }
+            });
+        }
+
+        function copyCurrentModelLink() {
+            if (!currentOpenModelName) { showToast("احفظ النموذج أولاً!"); return; }
+            navigator.clipboard.writeText(window.location.origin + window.location.pathname + "?exam=" + encodeURIComponent(currentOpenModelName));
+            showToast("تم نسخ رابط الاختبار للطلاب بنجاح! 🔗");
+        }
+
+        async function renameCurrentModel() {
+            if (!currentOpenModelName) { showToast("النموذج جديد غير محفوظ!"); return; }
+            const newName = prompt(`الاسم الجديد للنموذج "${currentOpenModelName}":`, currentOpenModelName);
+            if (!newName || newName.trim() === "") return;
+            let saved = JSON.parse(localStorage.getItem('fifi_all_saved_models') || '{}');
+            if(saved[currentOpenModelName]) { saved[newName.trim()] = saved[currentOpenModelName]; delete saved[currentOpenModelName]; localStorage.setItem('fifi_all_saved_models', JSON.stringify(saved)); }
+            try {
+                let s = await rtdb.ref('models/' + currentOpenModelName).once('value');
+                if(s.exists()) { await rtdb.ref('models/' + newName.trim()).set(s.val()); await rtdb.ref('models/' + currentOpenModelName).remove(); }
+            } catch(e){}
+            currentOpenModelName = newName.trim();
+            document.getElementById('current-model-label').innerText = `📁 ${currentOpenModelName}`;
+            showToast("تم تغيير الاسم بنجاح!"); populateTeacherModelDropdown();
+        }
+
+        async function deleteCurrentModel() {
+            if (!currentOpenModelName || !confirm("حذف هذا النموذج نهائياً؟")) return;
+            let saved = JSON.parse(localStorage.getItem('fifi_all_saved_models') || '{}');
+            delete saved[currentOpenModelName]; localStorage.setItem('fifi_all_saved_models', JSON.stringify(saved));
+            try { await rtdb.ref('models/' + currentOpenModelName).remove(); } catch(e){}
+            showToast("تم الحذف بنجاح.");
+            currentOpenModelName = null; currentExamStartTime = ""; currentExamEndTime = "";
+            document.getElementById('current-model-label').innerText = "📁 نموذج جديد";
+            clearAll(); populateTeacherModelDropdown();
+        }
+
+        async function saveToCloud() {
+            let name = currentOpenModelName || prompt("أدخل اسم النموذج لحفظه:");
+            if (!name || !name.trim()) return;
+            currentOpenModelName = name.trim();
+            document.getElementById('current-model-label').innerText = `📁 ${currentOpenModelName}`;
+            const dataToSave = JSON.parse(localStorage.getItem('fifi_final_v_secured') || '[]');
+            let pkg = { teacher: "أ. عبدالعزيز الفيفي", data: dataToSave, startTime: currentExamStartTime, endTime: currentExamEndTime, date: new Date().toLocaleString() };
+            
+            let saved = JSON.parse(localStorage.getItem('fifi_all_saved_models') || '{}');
+            saved[currentOpenModelName] = pkg; localStorage.setItem('fifi_all_saved_models', JSON.stringify(saved));
+            try { await rtdb.ref('models/' + currentOpenModelName).set(pkg); } catch(e){}
+            showToast(`تم حفظ نموذج "${currentOpenModelName}" بنجاح وتثبيته في السحاب! 💾`);
+            populateTeacherModelDropdown();
+        }
+
+        function closeModals() {
+            ['report-modal', 'cloud-modal', 'history-modal', 'time-modal', 'analytics-modal', 'modal-overlay'].forEach(id => document.getElementById(id).style.display = 'none');
+        }
+
+        function updateNumbers() { document.querySelectorAll('.q-number-badge').forEach((b, i) => b.innerText = `السؤال ${i+1}`); }
+
+        function saveAll() {
+            const qs = [], arrayItems = [];
+            document.querySelectorAll('.question-card').forEach(c => {
+                const qType = c.querySelector('.type-select')?.value || 'اختر الإجابة الصحيحة';
+                let opts = [], rightOpts = [], subScores = [];
+                let score = parseFloat(c.querySelector('.q-score-input')?.value) || 1;
+                let qTextArea = c.querySelector('.estieab-box')?.innerText || "";
+                if(qType.includes('مزاوجة')) {
+                    c.querySelectorAll('.opt-left').forEach(i => opts.push(i.value));
+                    c.querySelectorAll('.sub-score-input').forEach(i => subScores.push(parseFloat(i.value)||1));
+                    c.querySelectorAll('.opt-right').forEach(i => rightOpts.push(i.value));
+                    score = subScores.reduce((a,b)=>a+b, 0);
+                } else if(qType.includes('عددّد')) {
+                    c.querySelectorAll('.enum-label-input').forEach(i => opts.push(i.value));
+                    c.querySelectorAll('.sub-score-input').forEach(i => subScores.push(parseFloat(i.value)||1));
+                    score = subScores.reduce((a,b)=>a+b, 0);
+                } else { opts = Array.from(c.querySelectorAll('.opt')).map(i => i.value); }
+
+                let d = { ans: c.querySelector('.ans-val')?.value || '', qType: qType, text: c.querySelector('.q-main')?.value || "", text_area: qTextArea, opts: opts, rightOpts: rightOpts, subScores: subScores, score: score };
+                qs.push(d);
+                let itemObj = { t: qType, q: d.text, ans: d.ans, score: d.score };
+                if(qTextArea) itemObj.text_area = qTextArea;
+                if(opts.length>0) itemObj.opts = opts;
+                if(rightOpts.length>0) itemObj.rightOpts = rightOpts;
+                if(subScores.length>0) itemObj.subScores = subScores;
+                arrayItems.push(itemObj);
+            });
+            localStorage.setItem('fifi_final_v_secured', JSON.stringify(qs));
+            const ta = document.getElementById('arrayInputText');
+            if(ta) ta.value = "const rawQuizData = " + JSON.stringify(arrayItems, null, 2) + ";";
+        }
+
+        function loadQuestions() {
+            populateTeacherModelDropdown();
+            const id = new URLSearchParams(window.location.search).get('exam');
+            if (id) {
+                document.body.classList.add('student-mode');
+                document.getElementById('student-auth-container').style.display = 'block';
+                document.getElementById('student-exam-title-badge').innerText = `📄 اختبار: ${id}`;
+                document.getElementById('student-exam-title-badge').style.display = 'block';
+
+                let saved = JSON.parse(localStorage.getItem('fifi_all_saved_models') || '{}');
+                if (saved[id]) {
+                    currentOpenModelName = id; currentExamStartTime = saved[id].startTime || ""; currentExamEndTime = saved[id].endTime || "";
+                    shuffleArray([...saved[id].data]).forEach(q => addQuestion(q));
+                    return;
+                }
+                rtdb.ref('models/' + id).once('value', s => {
+                    if(s.val()) {
+                        currentOpenModelName = id; currentExamStartTime = s.val().startTime || ""; currentExamEndTime = s.val().endTime || "";
+                        shuffleArray([...s.val().data]).forEach(q => addQuestion(q));
+                    } else { showToast("النموذج غير موجود."); }
+                });
+            } else {
+                document.querySelector('.container').style.display = 'block';
+                const s = localStorage.getItem('fifi_final_v_secured');
+                if(s) JSON.parse(s).forEach(q => addQuestion(q)); else addQuestion();
+            }
+        }
+
+        function clearAll() {
+            if(confirm("مسح جميع الأسئلة؟")) {
+                document.getElementById('quiz-content').innerHTML = '';
+                document.getElementById('arrayInputText').value = '';
+                localStorage.removeItem('fifi_final_v_secured');
+                currentOpenModelName = null; currentExamStartTime = ""; currentExamEndTime = "";
+                document.getElementById('current-model-label').innerText = "📁 نموذج جديد";
+            }
+        }
+
+        window.onload = function() { loadQuestions(); };
+    </script>
+</body>
+</html>
